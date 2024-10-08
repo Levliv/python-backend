@@ -1,57 +1,50 @@
 from http import HTTPStatus
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query
-from ..models.cart_models import CartResponse
-from ..storage import create_cart as crt_cart, get_cart as gt_cart, get_carts as gt_carts, add_item_to_cart as ad_item_to_cart
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
+from ..models.cart_models import Cart
+from ..storage import create_cart as crt_cart, get_cart as gt_cart, get_carts as gt_carts, add_item_to_cart as ad_item_to_cart
 
 router_cart = APIRouter(prefix='/cart')
-
 
 @router_cart.post(
     '/',
     responses={
         HTTPStatus.CREATED: {
-            'description': 'Success: created new empty cart',
+            'description': 'Success',
         },
         HTTPStatus.UNPROCESSABLE_ENTITY: {
-            'description': 'Fail: did not create new empty cart',
+            'description': 'Fail',
         },
     },
     status_code=HTTPStatus.CREATED,
-    response_model=CartResponse,
-)
-async def create_cart(response: Response) -> CartResponse:
+    response_model=Cart)
+async def create_cart(response: Response) -> Cart:
     try:
         cart = crt_cart()
         response.headers['location'] = f'/cart/{cart.id}'
         return cart
-    except ValueError as e:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=str(e))
+    except ValueError:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY)
 
 
 @router_cart.get(
     '/{cart_id}',
     responses={
         HTTPStatus.OK: {
-            'description': 'Successfully returned requested cart',
+            'description': 'Success',
         },
-        HTTPStatus.NOT_FOUND: {
-            'description': 'Failed to return requested cart as one was not found',
+        HTTPStatus.UNPROCESSABLE_ENTITY: {
+            'description': 'Fail',
         },
     },
     status_code=HTTPStatus.OK,
-    response_model=CartResponse,
-)
-async def get_cart(cart_id: int) -> CartResponse:
+    response_model=Cart)
+async def get_cart(cart_id: int) -> Cart:
     try:
         cart = gt_cart(cart_id)
-        if cart is None:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND, detail='Cart not found'
-            )
-    except ValueError as e:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=str(e))
+    except ValueError:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY)
     return cart
 
 
@@ -59,33 +52,27 @@ async def get_cart(cart_id: int) -> CartResponse:
     '/',
     responses={
         HTTPStatus.OK: {
-            'description': 'Successfully returned list of carts',
+            'description': 'Success',
         },
-        HTTPStatus.NOT_FOUND: {
-            'description': 'Failed to return any carts for theese params',
+        HTTPStatus.UNPROCESSABLE_ENTITY: {
+            'description': 'Fail',
         },
     },
     status_code=HTTPStatus.OK,
-    response_model=List[CartResponse],
-)
+    response_model=List[Cart])
 async def get_carts(
-    offset: int = Query(0, ge=0),
-    limit: int = Query(10, gt=0),
-    min_price: Optional[float] = Query(None, ge=0),
-    max_price: Optional[float] = Query(None, ge=0),
-    min_quantity: Optional[int] = Query(None, ge=0),
-    max_quantity: Optional[int] = Query(None, ge=0),
-) -> List[CartResponse]:
+    offset: Optional[int] = 0,
+    limit: Optional[int] = 10,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    min_quantity: Optional[int] = None,
+    max_quantity: Optional[int] = None) -> List[Cart]:
     try:
         carts = gt_carts(
             offset, limit, min_price, max_price, min_quantity, max_quantity
         )
-        if carts is None:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND, detail='Carts not found'
-            )
-    except Exception as e:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=str(e))
+    except ValueError:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY)
     return carts
 
 
@@ -100,11 +87,10 @@ async def get_carts(
         },
     },
     status_code=HTTPStatus.CREATED,
-    response_model=CartResponse,
-)
-async def add_item_to_cart(cart_id: int, item_id: int) -> CartResponse:
+    response_model=Cart)
+async def add_item_to_cart(cart_id: int, item_id: int) -> Cart:
     try:
         cart = ad_item_to_cart(cart_id, item_id)
-    except Exception as e:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=str(e))
+    except ValueError:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY)
     return cart

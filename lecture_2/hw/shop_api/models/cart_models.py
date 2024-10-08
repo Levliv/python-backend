@@ -5,8 +5,8 @@ from typing import List
 class CartItem(BaseModel):
     id: int
     name: str
-    quantity: int
-    available: bool
+    quantity: int = 1
+    available: bool = True
 
 class Cart(BaseModel):
     id: int
@@ -15,8 +15,3 @@ class Cart(BaseModel):
 
 class CartRequest(BaseModel):
     item_id: int
-
-class CartResponse(BaseModel):
-    id: int
-    items: List[CartItem]
-    price: float

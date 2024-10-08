@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-
-
 from .routers.item_routers import router_item
 from .routers.cart_routers import router_cart
 
