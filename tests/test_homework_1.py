@@ -1,13 +1,10 @@
 from http import HTTPStatus
 from typing import Any
-
 import pytest
 from async_asgi_testclient import TestClient
-
 from lecture_1.hw.math_plain_asgi import app
 
 
-# @pytest.mark.xfail()
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("method", "path"),
@@ -27,7 +24,6 @@ async def test_not_found(method: str, path: str):
         assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-# @pytest.mark.xfail()
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("query", "status_code"),
@@ -51,7 +47,6 @@ async def test_factorial(query: dict[str, Any], status_code: int):
         assert "result" in response.json()
 
 
-# @pytest.mark.xfail()
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("params", "status_code"),
@@ -72,7 +67,6 @@ async def test_fibonacci(params: str, status_code: int):
         assert "result" in response.json()
 
 
-# @pytest.mark.xfail()
 @pytest.mark.asyncio()
 @pytest.mark.parametrize(
     ("json", "status_code"),
