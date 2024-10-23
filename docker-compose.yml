@@ -1,0 +1,21 @@
+services:
+  shop_app:
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    container_name: shop_app
+    ports:
+      - "8080:8080"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: always
